@@ -1,0 +1,11 @@
+# workspace specific files
+/.workspace
+
+# cloud9 workspace settings file
+/.settings.xml
+
+# NPM modules
+/node_modules
+
+# Windows misc. files
+Thumbs.db
