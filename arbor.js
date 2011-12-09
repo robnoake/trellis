@@ -30,8 +30,10 @@ module.exports = function (options) {
      * Starts the express server for this application.
      */
     arbor.start = function () {
-        logger.info('Starting HTTP server on port ' + settings.http.port);
-        server.listen(settings.http.port);
+        arbor.bundle.finalize(function () {
+            logger.info('Starting HTTP server on port ' + settings.http.port);
+            server.listen(settings.http.port);
+        });        
     };
     
     return arbor;
