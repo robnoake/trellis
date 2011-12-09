@@ -3,9 +3,9 @@ var
     path = require('path');
     
 module.exports = function(arbor) {
-    var bundles,
+    var bundles = {},
         loadOrder,
-        dependencyGraph;
+        dependencyGraph = require('./dependencyGraph.js');
     
     function load(bundlePath) {
         bundlePath = path.normalize(bundlePath);
@@ -14,17 +14,17 @@ module.exports = function(arbor) {
         
         if (path.existsSync(bundleFile)) {
             arbor.logger.verbose('Loading bundle at: ' + bundlePath);
-            bundle = require(bundleFile);            
+            bundle = require(bundleFile)(arbor);            
             
             if (bundles.hasOwnProperty(bundle.name)) {
                 throw new Error('A bundle called ' + bundle.name + ' already exists, attempting to load another at ' + bundle.path);
             }
             
             bundle.path = path.dirname(bundlePath);
-            bundles[bundleName] = bundle;
+            bundles[bundle.name] = bundle;
             arbor.logger.verbose('Loaded bundle: ' + bundle.name);
             
-            dependencyGraph.addBundle(bundleName, bundle.requiredBundles);
+            dependencyGraph.addBundle(bundle.name, bundle.requiredBundles);
         } else {
             if (!path.existsSync(bundlePath)) {
                 throw new Error('Bundle path does not exist: ' + bundlePath);
@@ -35,11 +35,11 @@ module.exports = function(arbor) {
     
     function loadPath(bundleRootPath) {
         bundleRootPath = path.normalize(bundleRootPath);
-        arbor.logger.bundle('Adding all bundles in directory: ' + bundleRootPath);
+        arbor.logger.info('Adding all bundles in directory: ' + bundleRootPath);
         fs.readdirSync(bundleRootPath).forEach(function(fileName) {
     		if (fs.statSync(path.join(bundleRootPath, fileName)).isDirectory()) {
-                if (fs.fileExists(path.join(bundleRootPath, fileName, 'bundle.js'))) {
-				    addBundle(bundleRootPath + '/' + fileName);
+                if (path.existsSync(path.join(bundleRootPath, fileName, 'bundle.js'))) {
+				    load(bundleRootPath + '/' + fileName);
                 }
 			}
 		});
@@ -52,7 +52,7 @@ module.exports = function(arbor) {
         initNextBundle(onFinish);
     }
     
-    function initNext(onFinish) {
+    function initNextBundle(onFinish) {
         if (loadOrder.length > 0) {
             var nextBundle = loadOrder.pop();
             if (!bundles.hasOwnProperty(nextBundle)) {
@@ -62,7 +62,7 @@ module.exports = function(arbor) {
             arbor.logger.verbose('Initializing bundle: ' + nextBundle);
             
             bundles[nextBundle].init(function () {
-                initNext();
+                initNextBundle(onFinish);
             });
         } else {
             arbor.logger.info('Done loading bundles');
