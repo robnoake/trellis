@@ -7,12 +7,25 @@ Vertex = function(name) {
     return this;
 };
 
+Vertex.prototype.addPredecessor = function(vertexName) {
+    this.predecessors.push(vertexName);
+};
+
+Vertex.prototype.addSuccessor = function(vertexName) {
+    this.successors.push(vertexName);
+};
+
+Vertex.prototype.hasSuccessor = function(vertexName) {
+    return (this.successors.indexOf(vertexName) > -1);
+};
+
 Vertex.prototype.isRootVertex = function() {
     return (this.predecessors.length === 0);
 };
 
 Vertex.prototype.deleteSuccessor = function(successorName) {
     var index = this.successors.indexOf(successorName);
+    
     if (index > -1) {
         this.successors.splice(index,1);
         return true;
@@ -71,10 +84,10 @@ Graph.prototype.addEdge = function (headVertexName, tailVertexName) {
         
     // Check for existing edge
     if (!headVertex.hasSuccessor(tailVertex)) {
-        headVertex.successors.push(tailVertex.name);
-        tailVertex.predecessors.push(headVertex.name);
+        headVertex.addSuccessor(tailVertex.name);
+        tailVertex.addPredecessor(headVertex.name);
+        this.edgeCount++;
     }
-    this.edgeCount++;
     return true;
 };
 
@@ -129,7 +142,7 @@ module.exports = function () {
             var rootVertex = graphRoots.pop();
             loadOrder.push(rootVertex.name);
             while (rootVertex.successors.length > 0) {
-                var successorVertex = rootVertex.successors.pop();
+                var successorVertex = graph.vertices[rootVertex.successors[0]];
                 graph.delEdge(rootVertex.name, successorVertex.name);
                 
                 if (successorVertex.isRootVertex()) {
@@ -145,14 +158,14 @@ module.exports = function () {
     }
     
     function addBundle(bundleName, bundleRequires) {
-        console.log('Adding bundle: ' + bundleName);
         graph.createVertex(bundleName);
-        bundleRequires.forEach(function (bundleDependency) {
+        for (var i = 0; i < bundleRequires.length; i++) {
+            var bundleDependency = bundleRequires[i];
             if (!graph.hasVertex(bundleDependency)) {
                 graph.createVertex(bundleDependency);
             }
             graph.addEdge(bundleDependency, bundleName);
-        });
+        }
     }
     
     function getLoadOrder() {

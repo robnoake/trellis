@@ -17,7 +17,7 @@ module.exports = function(arbor) {
             bundle = require(bundleFile)(arbor);            
             
             if (bundles.hasOwnProperty(bundle.name)) {
-                throw new Error('A bundle called ' + bundle.name + ' already exists, attempting to load another at ' + bundle.path);
+                throw new Error('A bundle called ' + bundle.name + ' already exists, attempting to load another at ' + bundlePath);
             }
             
             bundle.path = path.dirname(bundlePath);
@@ -54,7 +54,7 @@ module.exports = function(arbor) {
     
     function initNextBundle(onFinish) {
         if (loadOrder.length > 0) {
-            var nextBundle = loadOrder.pop();
+            var nextBundle = loadOrder.shift();
             if (!bundles.hasOwnProperty(nextBundle)) {
                 throw new Error('Unmet bundle dependency: ' + nextBundle);
             }
