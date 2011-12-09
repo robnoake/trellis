@@ -12,7 +12,7 @@ module.exports = function(arbor) {
 		var bundleFile = path.join(bundlePath, 'bundle.js');
 
 		if (path.existsSync(bundleFile)) {
-			arbor.logger.verbose('Loading bundle at: ' + bundlePath);
+			arbor.logger.silly('Loading bundle at: ' + bundlePath);
 			var bundle = require(bundleFile)(arbor);
 
 			if (bundles.hasOwnProperty(bundle.name)) {
@@ -35,7 +35,7 @@ module.exports = function(arbor) {
 
 	function loadPath(bundleRootPath) {
 		bundleRootPath = path.normalize(bundleRootPath);
-		arbor.logger.info('Adding all bundles in directory: ' + bundleRootPath);
+		arbor.logger.verbose('Adding all bundles in directory: ' + bundleRootPath);
 		fs.readdirSync(bundleRootPath).forEach(function(fileName) {
 			if (fs.statSync(path.join(bundleRootPath, fileName)).isDirectory()) {
 				if (path.existsSync(path.join(bundleRootPath, fileName, 'bundle.js'))) {
