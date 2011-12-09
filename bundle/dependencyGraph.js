@@ -57,7 +57,7 @@ Graph.prototype.createVertex = function (vertexName) {
 };
 
 Graph.prototype.hasVertex = function (vertexName) {
-    return (this.vertices.hasOwnProperty(vertexName) !== 'undefined');
+    return this.vertices.hasOwnProperty(vertexName);
 };
 
 Graph.prototype.getRootVertices = function () {
@@ -158,7 +158,9 @@ module.exports = function () {
     }
     
     function addBundle(bundleName, bundleRequires) {
-        graph.createVertex(bundleName);
+    	if (!graph.hasVertex(bundleName)) {
+        	graph.createVertex(bundleName);
+    	}
         for (var i = 0; i < bundleRequires.length; i++) {
             var bundleDependency = bundleRequires[i];
             if (!graph.hasVertex(bundleDependency)) {
