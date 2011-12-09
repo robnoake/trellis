@@ -116,6 +116,10 @@ module.exports = function () {
     function topologicalSort() {
         var graphRoots = graph.getRootVertices(),
             loadOrder = [];
+            
+        if (Object.keys(graph.vertices).length === 0) {
+            throw new Error('Graph has no vertices');
+        }
         
         if (graphRoots.length === 0) {
             throw new Error('Graph has no root vertices');
@@ -156,6 +160,9 @@ module.exports = function () {
             return topologicalSort();
         } catch (e) {
             switch (e.message) {
+                case 'Graph has no vertices':
+                    throw new Error('No bundles loaded, check your configuration');
+                    break;
                 case 'Graph has no root vertices':
                 case 'Graph has at least one cycle':
                     throw new Error('Circular dependencies detected; cannot determine a load order');
