@@ -44,6 +44,10 @@ module.exports = function(arbor) {
 			}
 		});
 	}
+	
+	function injectDependency(bundle, dependency) {
+		dependencyGraph.addBundle(bundle, [dependency]);
+	}
 
 	function finalize(onFinish) {
 		arbor.logger.info('Calculating bundle initialization order');
@@ -88,6 +92,7 @@ module.exports = function(arbor) {
 
 	return {
 		get: get,
+		injectDependency: injectDependency,
 		finalize: finalize,
 		load: load,
 		loadPath: loadPath
