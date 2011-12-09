@@ -20,7 +20,7 @@ module.exports = function(arbor) {
                 throw new Error('A bundle called ' + bundle.name + ' already exists, attempting to load another at ' + bundlePath);
             }
             
-            bundle.path = path.dirname(bundlePath);
+            bundle.path = bundlePath;
             bundles[bundle.name] = bundle;
             arbor.logger.verbose('Loaded bundle: ' + bundle.name);
             
@@ -75,8 +75,8 @@ module.exports = function(arbor) {
      * @param string bundleName Name of the bundle to be retrieved
      */
     function get(bundleName) {
-        if (liveBundles.hasOwnProperty(bundleName)) {
-            return liveBundles[bundleName];
+        if (bundles.hasOwnProperty(bundleName)) {
+            return bundles[bundleName];
         } else {
             throw Error('Requested unknown bundle ' + bundleName);
         }
