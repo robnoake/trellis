@@ -1,4 +1,4 @@
-Vertex.prototype = function(name) {
+Vertex = function(name) {
     this.name = name;
     
     this.successors = [];
@@ -31,7 +31,7 @@ Vertex.prototype.deletePredecessor = function(predecessorName) {
     }
 };
 
-Graph.prototype = function () {
+Graph = function () {
     this.vertices = {};
     this.edgeCount = 0; // used to detect cycles when performing topological sort
     
@@ -48,7 +48,13 @@ Graph.prototype.hasVertex = function (vertexName) {
 };
 
 Graph.prototype.getRootVertices = function () {
-    return this.vertices.filter(function (element) { return element.isRootVexter(); });
+    var rootVertices = [];
+    for (var property in this.vertices) {
+        if (this.vertices.hasOwnProperty(property) && this.vertices[property].isRootVertex()) {
+            rootVertices.push(this.vertices[property]);
+        }
+    }
+    return rootVertices;
 };
 
 Graph.prototype.addEdge = function (headVertexName, tailVertexName) {
@@ -121,6 +127,7 @@ module.exports = function () {
             while (rootVertex.successors.length > 0) {
                 var successorVertex = rootVertex.successors.pop();
                 graph.delEdge(rootVertex.name, successorVertex.name);
+                
                 if (successorVertex.isRootVertex()) {
                     graphRoots.push(successorVertex);
                 }
@@ -134,6 +141,7 @@ module.exports = function () {
     }
     
     function addBundle(bundleName, bundleRequires) {
+        console.log('Adding bundle: ' + bundleName);
         graph.createVertex(bundleName);
         bundleRequires.forEach(function (bundleDependency) {
             if (!graph.hasVertex(bundleDependency)) {
@@ -147,7 +155,14 @@ module.exports = function () {
         try {
             return topologicalSort();
         } catch (e) {
-            throw new Error('Circular dependencies detected; cannot determine a load order');
+            switch (e.message) {
+                case 'Graph has no root vertices':
+                case 'Graph has at least one cycle':
+                    throw new Error('Circular dependencies detected; cannot determine a load order');
+                    break;
+                default:
+                    throw e;
+            }
         }
     }
     
@@ -157,4 +172,4 @@ module.exports = function () {
         addBundle: addBundle,
         getLoadOrder: getLoadOrder
     };
-};
+}();
