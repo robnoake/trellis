@@ -1,6 +1,7 @@
 var express = require('express'),
     path = require('path'),
     Settings = require('settings'),
+    settingsDecorator = require ('./settingsDecorator.js'),
     Winston = require('winston');
 
 module.exports = function () {
@@ -19,6 +20,8 @@ module.exports = function () {
     
     arbor.logger.verbose('Logger initialized');
     
+    settingsDecorator(arbor);
+    
     arbor.logger.verbose('Loading bundle manager');    
     arbor.bundle = require('./bundle/manager.js')(arbor);
     
@@ -29,8 +32,7 @@ module.exports = function () {
     arbor.express = express.createServer(
         express.bodyParser(),
         express.methodOverride(),
-        express.cookieParser(),
-        express.session({ secret: arbor.settings.session.secret })
+        express.cookieParser()
     );
     
     /**
