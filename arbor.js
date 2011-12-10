@@ -21,6 +21,7 @@ module.exports = function() {
 
 	arbor.logger.verbose('Loading bundle manager');
 	arbor.bundle = require('./bundle/manager.js')(arbor);
+	arbor.get = arbor.bundle.get;
 
 	arbor.settings.bundle.directories.forEach(function(bundleRoot) {
 		arbor.bundle.loadPath(path.join(process.cwd(), bundleRoot));
