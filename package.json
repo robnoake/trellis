@@ -1,10 +1,9 @@
 {
-	"name": "arbor",
-	"main": "arbor.js",
+	"name": "trellis",
+	"main": "trellis.js",
 	"version": "0.0.1",
 	"private": true,
 	"dependencies": {
-		"express": ">=2.5.1",
 		"settings": ">=0.0.2",
 		"winston": ">=0.5.6"
 	},

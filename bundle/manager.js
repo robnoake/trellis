@@ -3,7 +3,7 @@ var fs = require('fs'),
 
 var inspect = require('util').inspect;
 
-module.exports = function(arbor) {
+module.exports = function(trellis) {
 	var bundles = {},
 		loadOrder, dependencyGraph = require('./dependencyGraph.js');
 
@@ -12,8 +12,8 @@ module.exports = function(arbor) {
 		var bundleFile = path.join(bundlePath, 'bundle.js');
 
 		if (path.existsSync(bundleFile)) {
-			arbor.logger.silly('Loading bundle at: ' + bundlePath);
-			var bundle = require(bundleFile)(arbor);
+			trellis.logger.silly('Loading bundle at: ' + bundlePath);
+			var bundle = require(bundleFile)(trellis);
 
 			if (bundles.hasOwnProperty(bundle.name)) {
 				throw new Error('A bundle called ' + bundle.name + ' already exists, attempting to load another at ' + bundlePath);
@@ -21,7 +21,7 @@ module.exports = function(arbor) {
 
 			bundle.path = bundlePath;
 			bundles[bundle.name] = bundle;
-			arbor.logger.verbose('Loaded bundle: ' + bundle.name);
+			trellis.logger.verbose('Loaded bundle: ' + bundle.name);
 
 			dependencyGraph.addBundle(bundle.name, bundle.requiredBundles);
 		}
@@ -35,7 +35,7 @@ module.exports = function(arbor) {
 
 	function loadPath(bundleRootPath) {
 		bundleRootPath = path.normalize(bundleRootPath);
-		arbor.logger.verbose('Adding all bundles in directory: ' + bundleRootPath);
+		trellis.logger.verbose('Adding all bundles in directory: ' + bundleRootPath);
 		fs.readdirSync(bundleRootPath).forEach(function(fileName) {
 			if (fs.statSync(path.join(bundleRootPath, fileName)).isDirectory()) {
 				if (path.existsSync(path.join(bundleRootPath, fileName, 'bundle.js'))) {
@@ -50,7 +50,7 @@ module.exports = function(arbor) {
 	}
 
 	function finalize(onFinish) {
-		arbor.logger.info('Calculating bundle initialization order');
+		trellis.logger.info('Calculating bundle initialization order');
 		loadOrder = dependencyGraph.getLoadOrder();
 
 		// Synchronously load each item
@@ -64,14 +64,14 @@ module.exports = function(arbor) {
 				throw new Error('Unmet bundle dependency: ' + nextBundle);
 			}
 
-			arbor.logger.verbose('Initializing bundle: ' + nextBundle);
+			trellis.logger.verbose('Initializing bundle: ' + nextBundle);
 
 			bundles[nextBundle].initialize(function() {
 				initNextBundle(onFinish);
 			});
 		}
 		else {
-			arbor.logger.info('Done loading bundles');
+			trellis.logger.info('Done loading bundles');
 			onFinish();
 		}
 	}
