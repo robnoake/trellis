@@ -1,8 +1,6 @@
 var fs = require('fs'),
 	path = require('path');
 
-var inspect = require('util').inspect;
-
 module.exports = function(trellis) {
 	var bundles = {},
 		loadOrder, dependencyGraph = require('./dependencyGraph.js');
