@@ -14,12 +14,14 @@ module.exports = function() {
 	trellis.logger = new Winston.Logger({
 		transports: [new Winston.transports.Console(trellis.settings.logger.console)]
 	});
+	
+	trellis.logger.setLevels(Winston.config.syslog.levels);
 
-	trellis.logger.verbose('Logger initialized');
+	trellis.logger.debug('Logger initialized');
 
 	settingsDecorator(trellis);
 
-	trellis.logger.verbose('Loading bundle manager');
+	trellis.logger.debug('Loading bundle manager');
 	trellis.bundle = require('./bundle/manager.js')(trellis);
 	trellis.get = trellis.bundle.get;
 

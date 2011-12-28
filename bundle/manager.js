@@ -2,15 +2,17 @@ var fs = require('fs'),
 	path = require('path');
 
 module.exports = function(trellis) {
-	var bundles = {},
-		loadOrder, dependencyGraph = require('./dependencyGraph.js');
+	var self = {},
+		bundles = {},
+		loadOrder, 
+		dependencyGraph = require('./dependencyGraph.js');
 
-	function load(bundlePath) {
+	self.load = function (bundlePath) {
 		bundlePath = path.normalize(bundlePath);
 		var bundleFile = path.join(bundlePath, 'bundle.js');
 
 		if (path.existsSync(bundleFile)) {
-			trellis.logger.silly('Loading bundle at: ' + bundlePath);
+			trellis.logger.debug('Loading bundle at: ' + bundlePath);
 			var bundle = require(bundleFile)(trellis);
 
 			if (bundles.hasOwnProperty(bundle.name)) {
@@ -19,7 +21,7 @@ module.exports = function(trellis) {
 
 			bundle.path = bundlePath;
 			bundles[bundle.name] = bundle;
-			trellis.logger.verbose('Loaded bundle: ' + bundle.name);
+			trellis.logger.debug('Loaded bundle: ' + bundle.name);
 
 			dependencyGraph.addBundle(bundle.name, bundle.requiredBundles);
 		}
@@ -29,70 +31,62 @@ module.exports = function(trellis) {
 			}
 			throw new Error('Missing bundle.js in path: ' + bundlePath);
 		}
-	}
+	};
 
-	function loadPath(bundleRootPath) {
+	self.loadPath = function (bundleRootPath) {
 		bundleRootPath = path.normalize(bundleRootPath);
-		trellis.logger.verbose('Adding all bundles in directory: ' + bundleRootPath);
+		trellis.logger.debug('Adding all bundles in directory: ' + bundleRootPath);
 		fs.readdirSync(bundleRootPath).forEach(function(fileName) {
 			if (fs.statSync(path.join(bundleRootPath, fileName)).isDirectory()) {
 				if (path.existsSync(path.join(bundleRootPath, fileName, 'bundle.js'))) {
-					load(bundleRootPath + '/' + fileName);
+					self.load(bundleRootPath + '/' + fileName);
 				}
 			}
 		});
-	}
+	};
 	
-	function injectDependency(bundle, dependency) {
+	self.injectDependency = function (bundle, dependency) {
 		dependencyGraph.addBundle(bundle, [dependency]);
-	}
+	};
 
-	function finalize(onFinish) {
-		trellis.logger.info('Calculating bundle initialization order');
+	self.finalize = function (onFinish) {
+		trellis.logger.debug('Calculating bundle initialization order');
 		loadOrder = dependencyGraph.getLoadOrder();
 
-		// Synchronously load each item
-		initNextBundle(onFinish);
-	}
+		self.initNextBundle(onFinish);
+	};
 
-	function initNextBundle(onFinish) {
+	self.initNextBundle = function (onFinish) {
 		if (loadOrder.length > 0) {
 			var nextBundle = loadOrder.shift();
 			if (!bundles.hasOwnProperty(nextBundle)) {
 				throw new Error('Unmet bundle dependency: ' + nextBundle);
 			}
 
-			trellis.logger.verbose('Initializing bundle: ' + nextBundle);
+			trellis.logger.debug('Initializing bundle: ' + nextBundle);
 
 			bundles[nextBundle].initialize(function() {
-				initNextBundle(onFinish);
+				self.initNextBundle(onFinish);
 			});
 		}
 		else {
-			trellis.logger.info('Done loading bundles');
+			trellis.logger.debug('Done loading bundles');
 			onFinish();
 		}
-	}
+	};
 
 	/**
 	 * Retrieves a loaded bundle
 	 * @param string bundleName Name of the bundle to be retrieved
 	 */
-
-	function get(bundleName) {
+	self.get = function (bundleName) {
 		if (bundles.hasOwnProperty(bundleName)) {
 			return bundles[bundleName];
 		}
 		else {
 			throw Error('Requested unknown bundle ' + bundleName);
 		}
-	}
-
-	return {
-		get: get,
-		injectDependency: injectDependency,
-		finalize: finalize,
-		load: load,
-		loadPath: loadPath
 	};
+
+	return self;
 };
