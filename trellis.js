@@ -4,8 +4,7 @@ var path = require('path'),
 	Winston = require('winston');
 
 module.exports = function() {
-	var trellis = {},
-		bundleManager, logger, server;
+	var trellis = {};
 
 	trellis.settings = new Settings(path.join(process.cwd(), 'config', 'environment.js')).getEnvironment('test');
 
