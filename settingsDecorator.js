@@ -4,7 +4,7 @@
  */
 var util = require('util');
 
-module.exports = function(arbor) {
+module.exports = function(trellis) {
 
 	function exists(path) {
 		var parts = settingString.split('.'),
