@@ -7,6 +7,9 @@ module.exports = function(trellis) {
 		loadOrder, 
 		dependencyGraph = require('./dependencyGraph.js');
 
+	/**
+	 * Load a bundle at the given path.
+	 */
 	self.load = function (bundlePath) {
 		bundlePath = path.normalize(bundlePath);
 		var bundleFile = path.join(bundlePath, 'bundle.js');
@@ -33,6 +36,10 @@ module.exports = function(trellis) {
 		}
 	};
 
+	/**
+	 * Loads all bundles under a given path. Directories without a bundle.js file
+	 * are silently ignored.
+	 */
 	self.loadPath = function (bundleRootPath) {
 		bundleRootPath = path.normalize(bundleRootPath);
 		trellis.logger.debug('Adding all bundles in directory: ' + bundleRootPath);
@@ -45,10 +52,17 @@ module.exports = function(trellis) {
 		});
 	};
 	
+	/**
+	 * Injects a dependency into the graph for the named bundle.
+	 */
 	self.injectDependency = function (bundle, dependency) {
 		dependencyGraph.addBundle(bundle, [dependency]);
 	};
 
+	/**
+	 * Finalizes loaded bundles. This triggers bundle initialization calls, and
+	 * will invoke the onFinish callback when all bundles are loaded.
+	 */
 	self.finalize = function (onFinish) {
 		trellis.logger.debug('Calculating bundle initialization order');
 		loadOrder = dependencyGraph.getLoadOrder();
@@ -56,6 +70,9 @@ module.exports = function(trellis) {
 		self.initNextBundle(onFinish);
 	};
 
+	/**
+	 * Takes the next bundle in the load order and invokes initialization.
+	 */
 	self.initNextBundle = function (onFinish) {
 		if (loadOrder.length > 0) {
 			var nextBundle = loadOrder.shift();
