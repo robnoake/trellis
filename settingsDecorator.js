@@ -1,5 +1,5 @@
 /**
- * Decorates arbor.setting with helper methods that allow bundles to impose 
+ * Decorates trellis.setting with helper methods that allow bundles to impose 
  * constraints on configuration during startup.
  */
 var util = require('util');
@@ -8,7 +8,7 @@ module.exports = function(arbor) {
 
 	function exists(path) {
 		var parts = settingString.split('.'),
-			parentObject = arbor.settings;
+			parentObject = trellis.settings;
 
 		for (var i = 0; i < parts.length; i++) {
 			var nextPart = parts[i];
@@ -22,9 +22,9 @@ module.exports = function(arbor) {
 		return true;
 	}
 
-	arbor.settings.defaultValue = function(settingString, defaultValue) {
+	trellis.settings.defaultValue = function(settingString, defaultValue) {
 		var parts = settingString.split('.'),
-			parentObject = arbor.settings;
+			parentObject = trellis.settings;
 
 		for (var i = 0; i < parts.length; i++) {
 			var nextPart = parts[i];
@@ -41,9 +41,9 @@ module.exports = function(arbor) {
 		}
 	};
 
-	arbor.settings.require = function(settingString) {
+	trellis.settings.require = function(settingString) {
 		var parts = settingString.split('.'),
-			parentObject = arbor.settings,
+			parentObject = trellis.settings,
 			objectPath = '';
 
 		for (var i = 0; i < parts.length; i++) {
@@ -56,8 +56,8 @@ module.exports = function(arbor) {
 
 			if (!parentObject.hasOwnProperty(nextPart)) {
 				var errorMessage = util.format('Required setting "%s" not present in configuration', objectPath);
-				if (arbor.logger) {
-					arbor.logger.error(errorMessage);
+				if (trellis.logger) {
+					trellis.logger.error(errorMessage);
 				}
 				else {
 					console.error(errorMessage);
