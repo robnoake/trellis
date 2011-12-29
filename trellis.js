@@ -9,8 +9,6 @@ module.exports = function() {
 
 	trellis.settings = new Settings(path.join(process.cwd(), 'config', 'environment.js')).getEnvironment('test');
 
-	console.log('Loaded settings');
-
 	trellis.logger = new Winston.Logger({
 		transports: [new Winston.transports.Console(trellis.settings.logger.console)]
 	});
