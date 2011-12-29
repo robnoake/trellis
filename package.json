@@ -1,7 +1,7 @@
 {
 	"name": "trellis",
 	"main": "trellis.js",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"private": true,
 	"dependencies": {
 		"settings": ">=0.0.2",
