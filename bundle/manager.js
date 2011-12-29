@@ -59,21 +59,11 @@ module.exports = function(trellis) {
 		dependencyGraph.addBundle(bundle, [dependency]);
 	};
 
-	/**
-	 * Finalizes loaded bundles. This triggers bundle initialization calls, and
-	 * will invoke the onFinish callback when all bundles are loaded.
-	 */
-	self.finalize = function (onFinish) {
-		trellis.logger.debug('Calculating bundle initialization order');
-		loadOrder = dependencyGraph.getLoadOrder();
-
-		self.initNextBundle(onFinish);
-	};
 
 	/**
 	 * Takes the next bundle in the load order and invokes initialization.
 	 */
-	self.initNextBundle = function (onFinish) {
+	function initNextBundle (onFinish) {
 		if (loadOrder.length > 0) {
 			var nextBundle = loadOrder.shift();
 			if (!bundles.hasOwnProperty(nextBundle)) {
@@ -83,13 +73,24 @@ module.exports = function(trellis) {
 			trellis.logger.debug('Initializing bundle: ' + nextBundle);
 
 			bundles[nextBundle].initialize(function() {
-				self.initNextBundle(onFinish);
+				initNextBundle(onFinish);
 			});
 		}
 		else {
 			trellis.logger.debug('Done loading bundles');
 			onFinish();
 		}
+	}
+
+/**
+	 * Finalizes loaded bundles. This triggers bundle initialization calls, and
+	 * will invoke the onFinish callback when all bundles are loaded.
+	 */
+	self.finalize = function (onFinish) {
+		trellis.logger.debug('Calculating bundle initialization order');
+		loadOrder = dependencyGraph.getLoadOrder();
+
+		initNextBundle(onFinish);
 	};
 
 	/**
