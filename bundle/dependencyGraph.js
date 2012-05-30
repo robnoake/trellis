@@ -1,6 +1,25 @@
 var Vertex = require('./vertex.js'),
 	Graph = require('./graph.js');
 
+function deepCopy(obj) {
+    if (Object.prototype.toString.call(obj) === '[object Array]') {
+        var out = [], i = 0, len = obj.length;
+        for ( ; i < len; i++ ) {
+            out[i] = arguments.callee(obj[i]);
+        }
+        return out;
+    }
+    if (typeof obj === 'object') {
+        var out = {}, i;
+        for ( i in obj ) {
+            out[i] = arguments.callee(obj[i]);
+        }
+        return out;
+    }
+    return obj;
+}
+
+
 module.exports = function() {
 	var graph;
 
@@ -16,10 +35,10 @@ module.exports = function() {
 	 */
 
 	function topologicalSort() {
-		var graphRoots = graph.getRootVertices(),
+		var workingGraph = deepCopy(graph), graphRoots = workingGraph.getRootVertices(),
 			loadOrder = [];
 
-		if (Object.keys(graph.vertices).length === 0) {
+		if (Object.keys(workingGraph.vertices).length === 0) {
 			throw new Error('Graph has no vertices');
 		}
 
@@ -31,15 +50,15 @@ module.exports = function() {
 			var rootVertex = graphRoots.pop();
 			loadOrder.push(rootVertex.name);
 			while (rootVertex.successors.length > 0) {
-				var successorVertex = graph.vertices[rootVertex.successors[0]];
-				graph.delEdge(rootVertex.name, successorVertex.name);
+				var successorVertex = workingGraph.vertices[rootVertex.successors[0]];
+				workingGraph.delEdge(rootVertex.name, successorVertex.name);
 
 				if (successorVertex.isRootVertex()) {
 					graphRoots.push(successorVertex);
 				}
 			}
 		}
-		if (graph.edgeCount > 0) {
+		if (workingGraph.edgeCount > 0) {
 			throw new Error('Graph has at least one cycle');
 		}
 		else {
@@ -77,10 +96,15 @@ module.exports = function() {
 		}
 	}
 
+	function getDependents(bundleName) {
+		return graph.vertices[bundleName].successors;
+	}
+
 	graph = new Graph();
 
 	return {
 		addBundle: addBundle,
-		getLoadOrder: getLoadOrder
+		getLoadOrder: getLoadOrder,
+		getDependents: getDependents
 	};
 }();

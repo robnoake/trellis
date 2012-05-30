@@ -15,6 +15,7 @@ module.exports = function() {
 	trellis.logger.setLevels(Winston.config.syslog.levels);
 
 	trellis.logger.debug('Logger initialized');
+	trellis.logger.info('Logger initialized');
 
 	settingsDecorator(trellis);
 

@@ -67,7 +67,8 @@ module.exports = function(trellis) {
 		if (loadOrder.length > 0) {
 			var nextBundle = loadOrder.shift();
 			if (!bundles.hasOwnProperty(nextBundle)) {
-				throw new Error('Unmet bundle dependency: ' + nextBundle);
+				var dependent = dependencyGraph.getDependents(nextBundle).shift();
+				throw new Error('Missing dependency: ' + dependent + ' requires ' + nextBundle);
 			}
 
 			trellis.logger.debug('Initializing bundle: ' + nextBundle);
